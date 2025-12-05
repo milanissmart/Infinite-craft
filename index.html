@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Mini Craft Game</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f0f0f0;
+        margin: 0;
+        padding: 20px;
+    }
+
+    #inventory, #board {
+        border: 2px solid #444;
+        padding: 10px;
+        min-height: 150px;
+        background: white;
+        margin-bottom: 20px;
+    }
+
+    h2 { margin-top: 0; }
+
+    .item {
+        display: inline-block;
+        padding: 8px 12px;
+        margin: 5px;
+        background: #d9eaff;
+        border: 1px solid #888;
+        border-radius: 6px;
+        cursor: grab;
+    }
+
+    .item:hover {
+        background: #c2ddff;
+    }
+</style>
+</head>
+<body>
+
+<h1>Mini Infinite Craft</h1>
+
+<h2>Inventory</h2>
+<div id="inventory"></div>
+
+<h2>Board (Drag items here to combine)</h2>
+<div id="board"></div>
+
+<script>
+// Starting items
+let items = ["Fire", "Water", "Earth", "Air"];
+
+// Simple recipe system (you can expand this!)
+const recipes = {
+    "Fire+Water": "Steam♨️",
+    "Earth+Water": "Mud💩",
+    "Fire+Earth": "Lava🔥",
+    "Air+Water": "Rain⛈️",
+    "Air+Fire": "Energy⚡",
+    "Earth+Air": "Dust",
+    "Fire+Steam": "Engine🚂",
+    "Engine+Fire":"Metal🔩",
+    "Energy+Energy":"lightning🌩️",
+    "Energy+Engine":"Car🚗",
+    "Energy+Energy":"lightning🌩️",
+};
+
+// Render items into inventory
+function renderInventory() {
+    const inv = document.getElementById('inventory');
+    inv.innerHTML = "";
+    items.forEach(item => {
+        const el = document.createElement('div');
+        el.className = "item";
+        el.draggable = true;
+        el.textContent = item;
+        el.dataset.item = item;
+
+        el.ondragstart = e => {
+            e.dataTransfer.setData("text/plain", item);
+        };
+
+        inv.appendChild(el);
+    });
+}
+
+// Board logic
+const board = document.getElementById("board");
+board.ondragover = e => e.preventDefault();
+
+board.ondrop = e => {
+    e.preventDefault();
+    const droppedItem = e.dataTransfer.getData("text/plain");
+
+    // Show item on board
+    const boardItem = document.createElement("div");
+    boardItem.className = "item";
+    boardItem.textContent = droppedItem;
+    boardItem.dataset.item = droppedItem;
+    board.appendChild(boardItem);
+
+    // If there are 2 items on the board, attempt combination
+    const placed = [...board.querySelectorAll(".item")];
+    if (placed.length >= 2) {
+        const a = placed[placed.length - 2].dataset.item;
+        const b = placed[placed.length - 1].dataset.item;
+
+        combineItems(a, b);
+    }
+};
+
+function combineItems(a, b) {
+    const key1 = `${a}+${b}`;
+    const key2 = `${b}+${a}`;
+
+    if (recipes[key1] || recipes[key2]) {
+        const result = recipes[key1] || recipes[key2];
+
+        if (!items.includes(result)) items.push(result);
+
+        alert(`You created: ${result}!`);
+
+        renderInventory();
+    }
+}
+
+renderInventory();
+</script>
+
+</body>
+</html>
